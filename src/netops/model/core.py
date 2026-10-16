@@ -10,6 +10,7 @@ from .cloud import (
     CloudRegion,
     PrivateInterconnect,
     RouteTable,
+    Subnet,
     TransitGateway,
     Vpc,
 )
@@ -42,6 +43,7 @@ class Interface(BaseModel):
     bandwidth_gbps: float | None = None
     status: str = Field(default="up", pattern="^(up|down|degraded)$")
     role: str | None = None
+    description: str | None = None
 
     @field_validator("ip")
     @classmethod
@@ -125,6 +127,7 @@ class Topology(BaseModel):
     regions: list[CloudRegion] = Field(default_factory=list)
     vpcs: list[Vpc] = Field(default_factory=list)
     transit_gateways: list[TransitGateway] = Field(default_factory=list)
+    subnets: list[Subnet] = Field(default_factory=list)
     route_tables: list[RouteTable] = Field(default_factory=list)
     prefix_lists: list[PrefixList] = Field(default_factory=list)
     as_path_filters: list[AsPathFilter] = Field(default_factory=list)
@@ -200,6 +203,23 @@ class Topology(BaseModel):
         for prefix in self.prefixes:
             if prefix.origin_device is not None:
                 require_device(prefix.origin_device, f"prefix.{prefix.prefix}")
+
+        vpcs = {vpc.name for vpc in self.vpcs}
+        for subnet in self.subnets:
+            if subnet.vpc not in vpcs:
+                errors.append(f"subnet.{subnet.name}: unknown vpc {subnet.vpc!r}")
+
+        for route_table in self.route_tables:
+            if route_table.vpc is not None and route_table.vpc not in vpcs:
+                errors.append(
+                    f"route_table.{route_table.name}: unknown vpc {route_table.vpc!r}"
+                )
+            if route_table.transit_gateway is not None:
+                known = {tg.name for tg in self.transit_gateways}
+                if route_table.transit_gateway not in known:
+                    errors.append(
+                        f"route_table.{route_table.name}: unknown transit gateway {route_table.transit_gateway!r}"
+                    )
 
         for cluster in self.rr_clusters:
             for reflector in cluster.reflectors + cluster.clients:

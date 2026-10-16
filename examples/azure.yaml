@@ -1,0 +1,35 @@
+name: batfish-azure
+
+annotations:
+  source: batfish/networks/cloud-azure
+  location: westeurope
+  security: "subnet-nsg attached to subnet:private"
+
+ases:
+  "8075":
+    name: microsoft
+    type: cloud
+
+providers:
+  azure:
+    name: azure
+    asn: 8075
+
+regions:
+  - { provider: azure, name: westeurope }
+
+vpcs:
+  - { name: VM-vnet, provider: azure, region: westeurope, cidr: 10.0.0.0/16 }
+
+subnets:
+  - name: default
+    vpc: VM-vnet
+    cidr: 10.0.0.0/24
+    hosts: [VM1346]
+  - name: private
+    vpc: VM-vnet
+    cidr: 10.0.1.0/24
+    hosts: [VM235]
+
+prefixes:
+  - { prefix: 10.0.0.0/16, labels: [azure-vnet, observed] }

@@ -13,6 +13,7 @@ from netops.model.cloud import (
     CloudRegion,
     RouteTable,
     RouteTableEntry,
+    Subnet,
     TransitGateway,
     Vpc,
 )
@@ -69,6 +70,7 @@ __all__ = [
     "SessionType",
     "SetStatement",
     "Side",
+    "Subnet",
     "Topology",
     "TransitGateway",
     "Vpc",

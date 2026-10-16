@@ -6,10 +6,19 @@ import pytest
 from pydantic import ValidationError
 
 from netops.graph import build_igp_graph
-from netops.loader import dump_topology, load_network_dir
+from netops.loader import dump_topology, load_network_dir, load_topology
 from netops.model import Topology
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "reference"
+EXAMPLES = Path(__file__).resolve().parents[1] / "examples"
+
+
+def test_example_files_load() -> None:
+    files = sorted(EXAMPLES.glob("*.yaml"))
+    assert len(files) >= 3
+    for path in files:
+        topo = load_topology(path)
+        assert isinstance(topo, Topology)
 
 
 def _minimal() -> dict:

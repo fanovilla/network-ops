@@ -1,0 +1,196 @@
+name: batfish-aws-hybrid
+
+annotations:
+  source: batfish/networks/hybrid-cloud-aws
+  region: us-west-2
+  vpn: vpn-ba2e34a8 (cgw-fb76ace5 <-> vgw-81fd279f)
+
+ases:
+  "16509":
+    name: aws
+    type: cloud
+  "65401":
+    name: aws-vgw
+    type: cloud
+  "65301":
+    name: onprem
+    type: private
+
+providers:
+  aws:
+    name: aws
+    asn: 16509
+
+regions:
+  - { provider: aws, name: us-west-2 }
+
+devices:
+  lhr-border-02:
+    role: dc_edge
+    asn: 65301
+    router_id: 10.10.255.8
+    platform: ios
+    igp: { protocol: ospf, areas: ["0.0.0.0"] }
+    interfaces:
+      Loopback0:
+        ip: 10.10.255.8/32
+        role: loopback
+      Tunnel1:
+        ip: 169.254.15.194/30
+        role: tunnel
+        bandwidth_gbps: 1
+      Tunnel2:
+        ip: 169.254.13.238/30
+        role: tunnel
+        bandwidth_gbps: 1
+      GigabitEthernet0/0:
+        ip: 192.168.60.37/24
+        role: management
+      Ethernet1/0:
+        ip: 10.10.10.38/30
+        role: fabric
+        description: link to lhr-fw-01 e1/3
+      Ethernet1/1:
+        ip: 10.10.10.46/30
+        role: fabric
+        description: link to lhr-fw-02 e1/3
+      Ethernet1/3:
+        ip: 10.10.30.1/30
+        status: down
+        description: link to lix-peer-01 e1/1
+      GigabitEthernet2/0:
+        ip: 172.16.1.2/30
+        role: uplink
+        description: Border Interface
+
+vpcs:
+  - { name: vpc-b390fad5, provider: aws, region: us-west-2, cidr: 192.168.0.0/16 }
+  - { name: vpc-925131f4, provider: aws, region: us-west-2, cidr: 10.0.0.0/16 }
+  - { name: vpc-f8fad69d, provider: aws, region: us-west-2, cidr: 172.31.0.0/16 }
+  - { name: vpc-815775e7, provider: aws, region: us-west-2, cidr: 10.100.0.0/16 }
+
+subnets:
+  - { name: subnet-8d0cbdeb, vpc: vpc-925131f4, cidr: 10.0.1.0/24, availability_zone: us-west-2a }
+  - { name: subnet-62f14104, vpc: vpc-925131f4, cidr: 10.0.0.0/24, availability_zone: us-west-2a }
+  - { name: subnet-073b8061, vpc: vpc-b390fad5, cidr: 192.168.2.16/28, availability_zone: us-west-2a }
+  - { name: subnet-7044ff16, vpc: vpc-b390fad5, cidr: 192.168.2.0/28, availability_zone: us-west-2a }
+  - { name: subnet-f73a8191, vpc: vpc-b390fad5, cidr: 192.168.2.48/28, availability_zone: us-west-2a }
+  - { name: subnet-30398256, vpc: vpc-b390fad5, cidr: 192.168.2.32/28, availability_zone: us-west-2a }
+  - { name: subnet-1641fa70, vpc: vpc-b390fad5, cidr: 192.168.1.0/24, availability_zone: us-west-2a }
+
+route_tables:
+  - name: rtb-296bf350
+    vpc: vpc-815775e7
+    propagating_vgws: [vgw-81fd279f]
+    entries:
+      - { prefix: 10.100.0.0/16, target: local, kind: static }
+      - { prefix: 10.1.1.0/24, target: vgw-81fd279f, kind: propagated }
+      - { prefix: 10.1.2.0/24, target: vgw-81fd279f, kind: propagated }
+      - { prefix: 10.1.3.0/24, target: vgw-81fd279f, kind: propagated }
+      - { prefix: 10.1.4.0/24, target: vgw-81fd279f, kind: propagated }
+      - { prefix: 0.0.0.0/0, target: vgw-81fd279f, kind: propagated }
+  - name: rtb-9fa476e6
+    vpc: vpc-b390fad5
+    subnets: [subnet-073b8061, subnet-7044ff16, subnet-30398256, subnet-1641fa70, subnet-f73a8191]
+    entries:
+      - { prefix: 192.168.0.0/16, target: local, kind: static }
+      - { prefix: 0.0.0.0/0, target: igw-9b93ddfc, kind: static }
+  - name: rtb-7b73bf02
+    vpc: vpc-925131f4
+    subnets: [subnet-62f14104]
+    entries:
+      - { prefix: 10.0.0.0/16, target: local, kind: static }
+      - { prefix: 0.0.0.0/0, target: igw-fac5839d, kind: static }
+  - name: rtb-f28e418b
+    vpc: vpc-925131f4
+    entries:
+      - { prefix: 10.0.0.0/16, target: local, kind: static }
+      - { prefix: 0.0.0.0/0, target: nat-055c00735cace0ec4, kind: static }
+  - name: rtb-e3d7e486
+    vpc: vpc-f8fad69d
+    entries:
+      - { prefix: 172.31.0.0/16, target: local, kind: static }
+      - { prefix: 0.0.0.0/0, target: igw-068fee63, kind: static }
+
+interconnects:
+  - name: vpn-ba2e34a8-tunnel1
+    kind: vpn
+    provider: aws
+    region: us-west-2
+    device: lhr-border-02
+    interface: Tunnel1
+    vif: vpn-ba2e34a8
+    capacity_gbps: 1
+    ipv4: 169.254.15.192/30
+    status: up
+  - name: vpn-ba2e34a8-tunnel2
+    kind: vpn
+    provider: aws
+    region: us-west-2
+    device: lhr-border-02
+    interface: Tunnel2
+    vif: vpn-ba2e34a8
+    capacity_gbps: 1
+    ipv4: 169.254.13.236/30
+    status: up
+
+sessions:
+  - name: s-lhr-aws-t1
+    type: ebgp
+    local_device: lhr-border-02
+    local_asn: 65301
+    peer_asn: 65401
+    peer: vgw-81fd279f
+    local_ip: 169.254.15.194
+    peer_ip: 169.254.15.193
+    interconnect: vpn-ba2e34a8-tunnel1
+    policy_in: PROTECT_LOOPBACK
+  - name: s-lhr-aws-t2
+    type: ebgp
+    local_device: lhr-border-02
+    local_asn: 65301
+    peer_asn: 65401
+    peer: vgw-81fd279f
+    local_ip: 169.254.13.238
+    peer_ip: 169.254.13.237
+    interconnect: vpn-ba2e34a8-tunnel2
+    policy_in: PROTECT_LOOPBACK
+  - name: s-lhr-core
+    type: ibgp
+    local_device: lhr-border-02
+    local_asn: 65301
+    peer_asn: 65301
+    peer: lhr-core-01
+    local_ip: 10.10.255.8
+    peer_ip: 10.10.255.7
+    multihop: true
+
+prefixes:
+  - { prefix: 10.10.0.0/16, origin_device: lhr-border-02, labels: [onprem] }
+  - { prefix: 10.1.1.0/24, labels: [vpn-observed] }
+  - { prefix: 10.1.2.0/24, labels: [vpn-observed] }
+  - { prefix: 10.1.3.0/24, labels: [vpn-observed] }
+  - { prefix: 10.1.4.0/24, labels: [vpn-observed] }
+  - { prefix: 0.0.0.0/0, labels: [default-originate] }
+
+prefix_lists:
+  - name: PL_PROTECT_LOOPBACK
+    entries:
+      - { prefix: 10.10.255.0/28, le: 32 }
+      - { prefix: 0.0.0.0/0, le: 32 }
+
+route_policies:
+  - name: PROTECT_LOOPBACK
+    statements:
+      - order: 10
+        action: deny
+        match: { prefix_list: PL_PROTECT_LOOPBACK }
+      - order: 20
+        action: permit
+  - name: SET_LOCAL_PREF
+    statements:
+      - order: 10
+        action: permit
+        set: { local_pref: 50 }
+      - order: 20
+        action: permit

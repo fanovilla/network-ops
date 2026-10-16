@@ -42,6 +42,14 @@ class Vpc(BaseModel):
     transit_gateway: str | None = None
 
 
+class Subnet(BaseModel):
+    name: str
+    vpc: str
+    cidr: str
+    availability_zone: str | None = None
+    hosts: list[str] = Field(default_factory=list)
+
+
 class RouteTableEntry(BaseModel):
     prefix: str
     target: str
@@ -52,4 +60,6 @@ class RouteTable(BaseModel):
     name: str
     vpc: str | None = None
     transit_gateway: str | None = None
+    subnets: list[str] = Field(default_factory=list)
+    propagating_vgws: list[str] = Field(default_factory=list)
     entries: list[RouteTableEntry] = Field(default_factory=list)
