@@ -1,0 +1,143 @@
+rr_clusters:
+  - id: dc1
+    reflectors: [dc1-core-1, dc1-core-2]
+    clients: [dc1-edge-1, dc1-edge-2, dc1-agg-1, dc1-agg-2]
+  - id: dc2
+    reflectors: [dc2-core-1, dc2-core-2]
+    clients: [dc2-edge-3, dc2-edge-4, dc2-agg-1, dc2-agg-2]
+
+sessions:
+  - name: s-c1-c2
+    type: ibgp
+    local_device: dc1-core-1
+    local_asn: 65100
+    peer_asn: 65100
+    peer: dc1-core-2
+    local_ip: 10.10.0.1
+    peer_ip: 10.10.0.2
+    multihop: true
+  - name: s-c1-dc2c1
+    type: ibgp
+    local_device: dc1-core-1
+    local_asn: 65100
+    peer_asn: 65100
+    peer: dc2-core-1
+    local_ip: 10.10.0.1
+    peer_ip: 10.10.3.1
+    multihop: true
+  - name: s-c1-dc2c2
+    type: ibgp
+    local_device: dc1-core-1
+    local_asn: 65100
+    peer_asn: 65100
+    peer: dc2-core-2
+    local_ip: 10.10.0.1
+    peer_ip: 10.10.3.2
+    multihop: true
+  - name: s-c2-dc2c1
+    type: ibgp
+    local_device: dc1-core-2
+    local_asn: 65100
+    peer_asn: 65100
+    peer: dc2-core-1
+    local_ip: 10.10.0.2
+    peer_ip: 10.10.3.1
+    multihop: true
+  - name: s-c2-dc2c2
+    type: ibgp
+    local_device: dc1-core-2
+    local_asn: 65100
+    peer_asn: 65100
+    peer: dc2-core-2
+    local_ip: 10.10.0.2
+    peer_ip: 10.10.3.2
+    multihop: true
+  - name: s-dc2c1-c2
+    type: ibgp
+    local_device: dc2-core-1
+    local_asn: 65100
+    peer_asn: 65100
+    peer: dc2-core-2
+    local_ip: 10.10.3.1
+    peer_ip: 10.10.3.2
+    multihop: true
+  - name: s-dc1e1-c1
+    type: ibgp
+    local_device: dc1-edge-1
+    local_asn: 65100
+    peer_asn: 65100
+    peer: dc1-core-1
+    local_ip: 10.10.2.1
+    peer_ip: 10.10.0.1
+    multihop: true
+    rr_client: true
+  - name: s-dc1e1-c2
+    type: ibgp
+    local_device: dc1-edge-1
+    local_asn: 65100
+    peer_asn: 65100
+    peer: dc1-core-2
+    local_ip: 10.10.2.1
+    peer_ip: 10.10.0.2
+    multihop: true
+    rr_client: true
+  - name: s-dc1e2-c1
+    type: ibgp
+    local_device: dc1-edge-2
+    local_asn: 65100
+    peer_asn: 65100
+    peer: dc1-core-1
+    local_ip: 10.10.2.2
+    peer_ip: 10.10.0.1
+    multihop: true
+    rr_client: true
+  - name: s-dc1e2-c2
+    type: ibgp
+    local_device: dc1-edge-2
+    local_asn: 65100
+    peer_asn: 65100
+    peer: dc1-core-2
+    local_ip: 10.10.2.2
+    peer_ip: 10.10.0.2
+    multihop: true
+    rr_client: true
+  - name: s-dc2e3-c3
+    type: ibgp
+    local_device: dc2-edge-3
+    local_asn: 65100
+    peer_asn: 65100
+    peer: dc2-core-1
+    local_ip: 10.10.5.1
+    peer_ip: 10.10.3.1
+    multihop: true
+    rr_client: true
+  - name: s-dc2e3-c4
+    type: ibgp
+    local_device: dc2-edge-3
+    local_asn: 65100
+    peer_asn: 65100
+    peer: dc2-core-2
+    local_ip: 10.10.5.1
+    peer_ip: 10.10.3.2
+    multihop: true
+    rr_client: true
+  - name: s-dc2e4-c3
+    type: ibgp
+    local_device: dc2-edge-4
+    local_asn: 65100
+    peer_asn: 65100
+    peer: dc2-core-1
+    local_ip: 10.10.5.2
+    peer_ip: 10.10.3.1
+    multihop: true
+    rr_client: true
+  - name: s-dc2e4-c4
+    type: ibgp
+    local_device: dc2-edge-4
+    local_asn: 65100
+    peer_asn: 65100
+    peer: dc2-core-2
+    local_ip: 10.10.5.2
+    peer_ip: 10.10.3.2
+    multihop: true
+    rr_client: true

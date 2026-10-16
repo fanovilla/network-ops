@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "netops"
+version = "0.1.0"
+description = "Network-as-code canonical model for a private hybrid BGP network"
+requires-python = ">=3.9"
+dependencies = [
+    "pydantic>=2,<3",
+    "PyYAML>=6.0",
+    "networkx>=2.8",
+    "eval_type_backport>=0.2; python_version < '3.10'",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7,<8"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

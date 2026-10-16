@@ -1,0 +1,19 @@
+name: netops-reference
+
+ases:
+  "65100":
+    name: netops-net
+    type: private
+  "16509":
+    name: aws
+    type: cloud
+  "15169":
+    name: google
+    type: cloud
+  "8075":
+    name: microsoft
+    type: cloud
+
+annotations:
+  project: netops-reference
+  scope: D1-private-only

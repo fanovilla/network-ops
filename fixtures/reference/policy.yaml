@@ -1,0 +1,47 @@
+prefixes:
+  - prefix: 10.50.0.0/22
+    origin_device: dc1-edge-1
+    anycast: true
+    labels: [service]
+  - prefix: 10.50.0.0/22
+    origin_device: dc1-edge-2
+    anycast: true
+    labels: [service]
+  - prefix: 10.50.4.0/22
+    origin_device: dc2-edge-3
+    anycast: true
+    labels: [service]
+  - prefix: 10.50.4.0/22
+    origin_device: dc2-edge-4
+    anycast: true
+    labels: [service]
+  - prefix: 10.100.0.0/20
+    origin_device: dc1-core-1
+    labels: [backend]
+
+prefix_lists:
+  - name: PL_DC_SVC
+    entries:
+      - { prefix: 10.50.0.0/21, le: 21 }
+
+as_path_filters:
+  - name: AS_PATH_NONE
+    regex: "^$"
+
+community_lists:
+  - name: COMMUNITY_NO_EXPORT
+    communities: ["65100:no-export"]
+
+route_policies:
+  - name: CLOUD_INC_LP
+    statements:
+      - order: 10
+        action: permit
+        match: { prefix_list: PL_DC_SVC }
+        set: { local_pref: 120 }
+      - order: 20
+        action: permit
+  - name: EBGP_OUT
+    statements:
+      - order: 10
+        action: permit
