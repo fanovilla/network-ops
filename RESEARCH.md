@@ -2,7 +2,7 @@
 
 Context: we are building a network-as-code system (NAC model + ordered renderer +
 protocol-accurate BGP failure simulation, per `REQUIREMENTS.md`) for a hybrid network —
-2 on-prem DCs, multiple cloud providers/regions, multiple telco partners, multi-level
+multiple on-prem DCs, multiple cloud providers/regions, multiple telco partners, multi-level
 redundancy. This doc answers: **which public descriptions/datasets of complex BGP
 topologies can we model on, and what is the reference network we will actually seed?**
 
@@ -50,7 +50,7 @@ are interesting.
 
 | Need | Available sources? | Gap |
 |------|--------------------|-----|
-| Our exact footprint (2 DCs + multi-cloud + telco) | No single public equivalent | **We declare it** (Section 3) |
+| Our exact footprint (multiple DCs + multi-cloud + telco) | No single public equivalent | **We declare it** (Section 3) |
 | Real vendor configs incl. iBGP/RR/policy to *import* | Batfish fixtures (partial; not RR-heavy) | FRRouting/EVE-NG/containerlab generated configs as complement |
 | Policy + AS relation truth combined | CAIDA (AS-only) × configs (policy-only) | We join by ASN; treat telco internals as summarized connectors (SIM-F-10) |
 | Validation of path predictions | RouteViews http://www.routeviews.org / RIPE RIS (real BGP tables) | We can *validate* our simulator's AS-path output for public prefixes against observed tables |
@@ -66,7 +66,7 @@ element can be traced to a real-world counterpart.
 
 ### 3.1 Scope & size (design targets, X-03)
 
-- Active topology nodes: ~50 routers (2 DCs × core/edge + cloud gateways + of those).
+- Active topology nodes: ~50 routers (multiple DCs × core/edge + cloud gateways + of those).
 - ASes: our enterprise AS **AS 65100** (private), 3 transit ISPs (AS 1, AS 3356, AS 1299 — real),
   1 regional ISP (AS 174-ish scaled down), 2 IXP peering points (real ASNs for IXP route-servers),
   3 cloud backbone ASes (AWS 16509, GCP 15169, Azure 8075) declared as *summarized connectors*.
@@ -87,7 +87,7 @@ element can be traced to a real-world counterpart.
 ```
 
 Redundancy contract (the interesting part for SIM): every telco peered at ≥2 edge
-routers ≥2 DCs; every cloud via ≥2 edge routers and ≥2 regions; inter-DC ≥2 disjoint
+routers across ≥2 DCs; every cloud via ≥2 edge routers and ≥2 regions; inter-DC ≥2 disjoint
 links; ECMP on agg→spine so a single link/session/node failure always has ≥1 clean
 alternative, but *some* double-failures are fatal by design (to make k-resiliency
 analysis meaningful).
@@ -120,7 +120,7 @@ analysis meaningful).
 ## 5. Recommendations (decisive)
 
 1. **Adopt the §3 reference network as the canonical model** — it is the only source that
-   matches the deployed reality (2 DCs × clouds × telcos × redundancy).
+   matches the deployed reality (multiple DCs × clouds × telcos × redundancy).
 2. **Seed NAC fixture configs from Batfish's `example`, `hybrid-cloud-aws`, `cloud-azure`**
    to prove the importer before writing any of our own configs.
 3. **Ground the telco/transit layer in CAIDA serial-2** around our ASN (subset, valve-free

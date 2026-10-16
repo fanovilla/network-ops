@@ -22,13 +22,13 @@ Format of one decision block:
 | Field | Value |
 |-------|-------|
 | Date | 2026-10-17 |
-| Decision | Scope the modeled network to **private connectivity only**: private links between on-prem DCs and cloud regions in both directions, and between the two on-prem DCs. Public internet transit / telco peers / IXPs are out of the initial model. |
+| Decision | Scope the modeled network to **private connectivity only**: private links between on-prem DCs and cloud regions in both directions, and between on-prem DCs. Public internet transit / telco peers / IXPs are out of the initial model. |
 | Rationale | The topology that matters for the failure stories in scope is the private underlay/overlay between our DCs and each cloud region. Telco public transit can be added later as summarized connectors without changing the core engine. |
 | Affects (req IDs) | NAC-M-02 (AS/peering surface), NAC-I-02 (cloud importers), DIA-P-02 (ranks), DIA-P-07 (layers), SIM-F-10 (summarized telco), SIM-S-07 (blackhole). |
 
 ### In scope (must model)
 
-- On-prem DCs (2): core/edge/aggregation fabric, inter-DC private links.
+- On-prem DCs (multiple): core/edge/aggregation fabric, inter-DC private links.
 - Private cloud connectivity, per cloud provider:
   - AWS **Direct Connect** (dedicated + VIF into VPC/TGW), AWS Transit Gateway.
   - GCP **Cloud Interconnect** (dedicated/partner, VLAN attachments) + VPC peering where relevant.

@@ -2,7 +2,7 @@
 
 Candidate libraries/data structures that could back the network-as-code system
 (`REQUIREMENTS.md`), rated against the three pillars plus cross-cutting requirements.
-Every candidate is judged on the **scale line**: can it serve an MVP (2 DCs, a few
+Every candidate is judged on the **scale line**: can it serve an MVP (multiple DCs, a few
 cloud regions, private links only — `SCOPE.md` D1) and grow to "exhaustive"
 (≥1,000 devices / 10k sessions / 1M prefixes, full BGP semantics, X-03)?
 

@@ -1,7 +1,7 @@
 # Network Operations — Requirements
 
-Project: a network-as-code system for a hybrid BGP network consisting of two on-prem
-datacenters, multiple cloud providers across multiple regions, and multiple telco
+Project: a network-as-code system for a hybrid BGP network consisting of multiple
+on-prem datacenters, multiple cloud providers across multiple regions, and multiple telco
 partners. Links carry multiple levels of redundancy.
 
 Three pillars:
