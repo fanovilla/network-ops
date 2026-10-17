@@ -8,6 +8,7 @@ class DeviceRole(str, enum.Enum):
     dc_edge = "dc_edge"
     dc_aggregation = "dc_aggregation"
     cloud_gateway = "cloud_gateway"
+    virtual_edge = "virtual_edge"
 
 
 class Side(str, enum.Enum):
@@ -25,6 +26,7 @@ class InterconnectKind(str, enum.Enum):
     direct_connect = "direct_connect"
     cloud_interconnect = "cloud_interconnect"
     expressroute = "expressroute"
+    megaport_vxc = "megaport_vxc"
     vpn = "vpn"
 
 

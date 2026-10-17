@@ -88,8 +88,8 @@ Format of one decision block:
 
 - Effective interconnect kinds are **Direct Connect / Cloud Interconnect / ExpressRoute**. The `vpn` enum value and `examples/aws-hybrid.yaml` (Batfish `hybrid-cloud-aws` fixture) are retained solely as an **import-corpus drill** for NAC-I-01 — not a representation of the in-scope product (D1 covers only dedicated private circuits).
 - **DC / region failure grouping**: `device.site` and `device.region` are introduced as the unit a failure scenario can target (SIM-S-02) — failing a site or region brings down every device in that group. No transport/optical details are modeled; a DC or region is just a grouping of BGP speakers and links.
-- **Provider limit (AWS/Azure/GCP)** is a product/app rule, not a model constraint — the model stays extensible for new providers (X-07).
-- Not modeled now: IPsec/SD-WAN tunnels, EVPN/VXLAN overlays, DWDM/dark fiber, security appliances, IPAM/subnet hierarchies (deferred to a later scope-down pass).
+- **Provider limit (AWS/Azure/GCP)** is a product/app rule, not a model constraint — the model stays extensible for new providers (X-07). **Megaport is added as an interconnect-fabric provider (D3)**, not a cloud provider.
+- Not modeled now: IPsec/SD-WAN tunnels, EVPN/VXLAN overlays, DWDM/dark fiber, security appliances (beyond MVE as a BGP edge device), IPAM/subnet hierarchies (deferred to a later scope-down pass).
 
 ### Revisit triggers
 
@@ -99,9 +99,34 @@ Format of one decision block:
 
 ---
 
+## D3 — Megaport MVE (interconnect fabric) in scope
+
+| Field | Value |
+|-------|-------|
+| Date | 2026-10-17 |
+| Decision | Model **Megaport Managed Virtual Edge (MVE) with Palo Alto VM-Series** as part of the private-connectivity surface. MVE is a virtual edge device (NVA) running on Megaport's SDN fabric; on-prem DCs reach it over VXCs; it fans out to AWS via a hosted **Direct Connect** connection (with its virtual interface), to Azure via **ExpressRoute**, and to GCP equivalently. |
+| Rationale | Dedicated private circuits often terminate in an MVE rather than your own edge router (per megaport.com docs for AWS/Azure). The MVE is a BGP speaker in the path, so failure/redundancy analysis must see it. |
+| Affects (req IDs) | NAC-M-02 (device roles, interconnect kinds), NAC-I-02 (megaport/cloud importers), DIA-P-02 (render MVE layer), SIM-S-02 (MVE/leg failure), SIM-F-10 (Megaport fabric is L2 transport; legs are the BGP reachability units). |
+
+### Modeling
+
+- `DeviceRole.virtual_edge` for MVE/other virtual NVAs; `platform` records the NVA type.
+- `InterconnectKind.megaport_vxc` for Megaport VXC legs (on-prem ↔ MVE and MVE ↔ cloud termination).
+- A full path is a chain: `vxc (dc→mve)` + `vxc/dx/cic/er (mve→cloud)`, each with its own eBGP session.
+- Megaport runs as `provider` with its own ASN (informational; VXC is L2 transport); the MVE's BGP ASN is a per-deployment parameter. Cloud-side peer ASNs follow the docs: AWS default 64512 (private VIF), Azure fixed 12076.
+- BGP MD5 shared keys are deliberately **not** stored in the model.
+
+### Revisit triggers
+
+- Other fabric providers (Equinix Fabric, PacketFabric) — generalize `megaport_vxc` into a `fabric_vxc` kind.
+- If firewall/zone semantics of VM-Series ever need modeling (currently it's an opaque BGP edge).
+
+---
+
 ## Decision log
 
 | # | Date | Statement | Status |
 |---|------|-----------|--------|
 | D1 | 2026-10-17 | Private networking only (DC↔cloud private links, DC↔DC); public transit/IXP deferred | Active |
 | D2 | 2026-10-17 | Out of scope for MVP: VPN, branches/meet-me rooms, DR-as-site, customer sites, providers beyond AWS/Azure/GCP, physical layer | Active |
+| D3 | 2026-10-17 | Megaport MVE (Palo Alto VM-Series) in scope: `virtual_edge` role, `megaport_vxc` kind, eBGP legs to AWS DX / Azure ER | Active |

@@ -1,0 +1,139 @@
+name: megaport-mve
+
+annotations:
+  scope: D3-in-scope
+  source: "docs.megaport.com/cloud/mve/palo-alto/aws/mve-aws-hosted ; docs.megaport.com/cloud/mve/palo-alto/azure"
+  example: "on-prem DC -> Megaport VXC -> Palo Alto VM-Series MVE -> AWS DX / Azure ER"
+  note: "MVE BGP ASN 65150; Megaport provider asn is platform/branding - VXC legs are L2 transport"
+
+ases:
+  "65100":
+    name: onprem
+    type: private
+  "65150":
+    name: mve
+    type: private
+  "64512":
+    name: aws-amazon-side
+    type: cloud
+  "12076":
+    name: azure-microsoft
+    type: cloud
+  "16509":
+    name: aws
+    type: cloud
+  "15169":
+    name: google
+    type: cloud
+  "8075":
+    name: microsoft
+    type: cloud
+  "133937":
+    name: megaport
+    type: provider
+
+providers:
+  aws: { name: aws, asn: 16509 }
+  azure: { name: azure, asn: 8075 }
+  gcp: { name: gcp, asn: 15169 }
+  megaport:
+    name: megaport
+    asn: 133937
+
+regions:
+  - { provider: aws, name: us-east-1 }
+  - { provider: azure, name: westeurope }
+  - { provider: gcp, name: us-central1 }
+  - { provider: megaport, name: megaport-london }
+
+devices:
+  dc1-edge-1:
+    role: dc_edge
+    asn: 65100
+    router_id: 10.10.2.1
+    platform: iosxr
+    site: dc1
+    region: eu-west-2
+    igp: { protocol: ospf, areas: ["0.0.0.0"] }
+    interfaces:
+      lo0: { ip: 10.10.2.1/32, role: loopback }
+      et-0/2/1: { ip: 10.50.0.1/30, role: interconnect }
+  mve-lhr-01:
+    role: virtual_edge
+    asn: 65150
+    router_id: 10.50.0.2
+    platform: paloalto-vmseries
+    site: megaport-london
+    region: megaport-london
+    interfaces:
+      ethernet1/0: { ip: 10.50.0.2/30, role: uplink }
+      ethernet1/1: { role: trunk, description: physical member for aws/azure subinterfaces }
+      ethernet1/1.1010: { ip: 10.60.0.1/30, vlan: 1010, role: interconnect }
+      ethernet1/1.1020: { ip: 10.70.0.1/30, vlan: 1020, role: interconnect }
+
+interconnects:
+  - name: vxc-dc1-mve
+    kind: megaport_vxc
+    provider: megaport
+    region: megaport-london
+    device: dc1-edge-1
+    interface: et-0/2/1
+    vif: vxc-445566
+    vlan: 20
+    capacity_gbps: 10
+    ipv4: 10.50.0.0/30
+    status: up
+  - name: vxc-mve-aws
+    kind: direct_connect
+    provider: aws
+    region: us-east-1
+    device: mve-lhr-01
+    interface: ethernet1/1.1010
+    vif: dxvif-a1b2c3
+    vlan: 1010
+    capacity_gbps: 10
+    ipv4: 10.60.0.0/30
+    status: up
+  - name: vxc-mve-azure
+    kind: expressroute
+    provider: azure
+    region: westeurope
+    device: mve-lhr-01
+    interface: ethernet1/1.1020
+    vif: sk-8f0e
+    vlan: 1020
+    capacity_gbps: 10
+    ipv4: 10.70.0.0/30
+    status: up
+
+sessions:
+  - name: s-dc1-mve
+    type: ebgp
+    local_device: dc1-edge-1
+    local_asn: 65100
+    peer_asn: 65150
+    peer: mve-lhr-01
+    local_ip: 10.50.0.1
+    peer_ip: 10.50.0.2
+    interconnect: vxc-dc1-mve
+  - name: s-mve-aws
+    type: ebgp
+    local_device: mve-lhr-01
+    local_asn: 65150
+    peer_asn: 64512
+    peer: aws-dx-use1
+    local_ip: 10.60.0.1
+    peer_ip: 10.60.0.2
+    interconnect: vxc-mve-aws
+  - name: s-mve-azure
+    type: ebgp
+    local_device: mve-lhr-01
+    local_asn: 65150
+    peer_asn: 12076
+    peer: azure-er-weu
+    local_ip: 10.70.0.1
+    peer_ip: 10.70.0.2
+    interconnect: vxc-mve-azure
+
+prefixes:
+  - { prefix: 10.100.0.0/20, origin_device: dc1-edge-1, labels: [onprem-service] }
