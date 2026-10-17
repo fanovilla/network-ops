@@ -29,6 +29,24 @@ class PrivateInterconnect(BaseModel):
     status: str = Field(default="up", pattern="^(up|down|degraded)$")
 
 
+class VxcEnd(BaseModel):
+    service: str
+    location: str
+    device: str | None = None
+    interface: str | None = None
+    vlan: int | None = None
+    vif: str | None = None
+    capacity_gbps: int | None = Field(default=None, gt=0)
+
+
+class VirtualCrossConnect(BaseModel):
+    name: str
+    provider: str = Field(default="megaport", pattern="^[a-z0-9_-]+$")
+    a_end: VxcEnd
+    b_end: VxcEnd
+    status: str = Field(default="up", pattern="^(up|down|degraded)$")
+
+
 class TransitGateway(BaseModel):
     name: str
     provider: str

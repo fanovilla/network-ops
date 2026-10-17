@@ -26,7 +26,6 @@ class InterconnectKind(str, enum.Enum):
     direct_connect = "direct_connect"
     cloud_interconnect = "cloud_interconnect"
     expressroute = "expressroute"
-    megaport_vxc = "megaport_vxc"
     vpn = "vpn"
 
 

@@ -3,8 +3,8 @@ name: megaport-mve
 annotations:
   scope: D3-in-scope
   source: "docs.megaport.com/cloud/mve/palo-alto/aws/mve-aws-hosted ; docs.megaport.com/cloud/mve/palo-alto/azure"
-  example: "on-prem DC -> Megaport VXC -> Palo Alto VM-Series MVE -> AWS DX / Azure ER"
-  note: "MVE BGP ASN 65150; Megaport provider asn is platform/branding - VXC legs are L2 transport"
+  example: "on-prem DC -> VXC -> Palo Alto VM-Series MVE -> AWS DX hosted / Azure ER"
+  note: "each VXC is a first-class failure unit with independent A/B ends and locations; MVE BGP ASN 65150"
 
 ases:
   "65100":
@@ -45,6 +45,7 @@ regions:
   - { provider: azure, name: westeurope }
   - { provider: gcp, name: us-central1 }
   - { provider: megaport, name: megaport-london }
+  - { provider: megaport, name: megaport-ashburn }
 
 devices:
   dc1-edge-1:
@@ -71,39 +72,52 @@ devices:
       ethernet1/1.1010: { ip: 10.60.0.1/30, vlan: 1010, role: interconnect }
       ethernet1/1.1020: { ip: 10.70.0.1/30, vlan: 1020, role: interconnect }
 
-interconnects:
+vxcs:
   - name: vxc-dc1-mve
-    kind: megaport_vxc
     provider: megaport
-    region: megaport-london
-    device: dc1-edge-1
-    interface: et-0/2/1
-    vif: vxc-445566
-    vlan: 20
-    capacity_gbps: 10
-    ipv4: 10.50.0.0/30
+    a_end:
+      service: megaport-port-dc1
+      location: megaport-london
+      device: dc1-edge-1
+      interface: et-0/2/1
+      vlan: 20
+      capacity_gbps: 10
+    b_end:
+      service: mve-lhr-01
+      location: megaport-london
+      device: mve-lhr-01
+      interface: ethernet1/0
+      capacity_gbps: 10
     status: up
   - name: vxc-mve-aws
-    kind: direct_connect
-    provider: aws
-    region: us-east-1
-    device: mve-lhr-01
-    interface: ethernet1/1.1010
-    vif: dxvif-a1b2c3
-    vlan: 1010
-    capacity_gbps: 10
-    ipv4: 10.60.0.0/30
+    provider: megaport
+    a_end:
+      service: mve-lhr-01
+      location: megaport-london
+      device: mve-lhr-01
+      interface: ethernet1/1.1010
+      vlan: 1010
+      capacity_gbps: 10
+    b_end:
+      service: aws-dx-hosted-use1
+      location: megaport-ashburn
+      vif: dxvif-a1b2c3
+      capacity_gbps: 10
     status: up
   - name: vxc-mve-azure
-    kind: expressroute
-    provider: azure
-    region: westeurope
-    device: mve-lhr-01
-    interface: ethernet1/1.1020
-    vif: sk-8f0e
-    vlan: 1020
-    capacity_gbps: 10
-    ipv4: 10.70.0.0/30
+    provider: megaport
+    a_end:
+      service: mve-lhr-01
+      location: megaport-london
+      device: mve-lhr-01
+      interface: ethernet1/1.1020
+      vlan: 1020
+      capacity_gbps: 10
+    b_end:
+      service: azure-expressroute-weu
+      location: megaport-london
+      vif: sk-8f0e
+      capacity_gbps: 10
     status: up
 
 sessions:
@@ -115,7 +129,7 @@ sessions:
     peer: mve-lhr-01
     local_ip: 10.50.0.1
     peer_ip: 10.50.0.2
-    interconnect: vxc-dc1-mve
+    vxc: vxc-dc1-mve
   - name: s-mve-aws
     type: ebgp
     local_device: mve-lhr-01
@@ -124,7 +138,7 @@ sessions:
     peer: aws-dx-use1
     local_ip: 10.60.0.1
     peer_ip: 10.60.0.2
-    interconnect: vxc-mve-aws
+    vxc: vxc-mve-aws
   - name: s-mve-azure
     type: ebgp
     local_device: mve-lhr-01
@@ -133,7 +147,7 @@ sessions:
     peer: azure-er-weu
     local_ip: 10.70.0.1
     peer_ip: 10.70.0.2
-    interconnect: vxc-mve-azure
+    vxc: vxc-mve-azure
 
 prefixes:
   - { prefix: 10.100.0.0/20, origin_device: dc1-edge-1, labels: [onprem-service] }

@@ -15,7 +15,9 @@ from netops.model.cloud import (
     RouteTableEntry,
     Subnet,
     TransitGateway,
+    VirtualCrossConnect,
     Vpc,
+    VxcEnd,
 )
 from netops.model.enums import (
     DeviceRole,
@@ -73,7 +75,9 @@ __all__ = [
     "Subnet",
     "Topology",
     "TransitGateway",
+    "VirtualCrossConnect",
     "Vpc",
+    "VxcEnd",
 ]
 
 __version__ = "0.1.0"

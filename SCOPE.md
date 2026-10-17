@@ -111,8 +111,10 @@ Format of one decision block:
 ### Modeling
 
 - `DeviceRole.virtual_edge` for MVE/other virtual NVAs; `platform` records the NVA type.
-- `InterconnectKind.megaport_vxc` for Megaport VXC legs (on-prem ↔ MVE and MVE ↔ cloud termination).
-- A full path is a chain: `vxc (dc→mve)` + `vxc/dx/cic/er (mve→cloud)`, each with its own eBGP session.
+- **`VirtualCrossConnect` (VXC) is a first-class entity**: each VXC has an `a_end` and a `b_end`, each with its own `service`, `location`, `device`/`interface`, `vlan`, `vif`, and `capacity`. The two ends may be in **different Megaport locations**, and each end is independently addressable.
+- **VXC is a failure unit** (SIM-S-02): a VXC leg, or one of its locations, can fail on its own — independent of the MVE and of the cloud-side legs — so a DC→MVE, MVE→cloud, or location-level failure is simulated per VXC, not hidden inside a device.
+- A BGP session runs over a `vxc` (via `BgpSession.vxc`, alongside `interconnect` for the dedicated-kind termination).
+- A full path is a chain: `vxc (dc→mve)` + `vxc (mve→cloud leg)` + optional dedicated `interconnect` (Direct Connect / Cloud Interconnect / ExpressRoute) at the cloud side.
 - Megaport runs as `provider` with its own ASN (informational; VXC is L2 transport); the MVE's BGP ASN is a per-deployment parameter. Cloud-side peer ASNs follow the docs: AWS default 64512 (private VIF), Azure fixed 12076.
 - BGP MD5 shared keys are deliberately **not** stored in the model.
 

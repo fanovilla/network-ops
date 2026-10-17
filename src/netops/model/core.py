@@ -12,6 +12,7 @@ from .cloud import (
     RouteTable,
     Subnet,
     TransitGateway,
+    VirtualCrossConnect,
     Vpc,
 )
 from .enums import DeviceRole, LinkType
@@ -125,6 +126,7 @@ class Topology(BaseModel):
     sessions: list[BgpSession] = Field(default_factory=list)
     rr_clusters: list[RouteReflectorCluster] = Field(default_factory=list)
     interconnects: list[PrivateInterconnect] = Field(default_factory=list)
+    vxcs: list[VirtualCrossConnect] = Field(default_factory=list)
     providers: dict[str, CloudProvider] = Field(default_factory=dict)
     regions: list[CloudRegion] = Field(default_factory=list)
     vpcs: list[Vpc] = Field(default_factory=list)
@@ -173,6 +175,8 @@ class Topology(BaseModel):
         for device in self.devices.values():
             require_asn(device.asn, f"device.{device.name}")
 
+        vxc_by_name = {vxc.name: vxc for vxc in self.vxcs}
+
         for session in self.sessions:
             require_device(session.local_device, f"session.{session.name}")
             require_asn(session.local_asn, f"session.{session.name}")
@@ -187,6 +191,8 @@ class Topology(BaseModel):
                     errors.append(
                         f"session.{session.name}: unknown interconnect {session.interconnect!r}"
                     )
+            if session.vxc is not None and session.vxc not in vxc_by_name:
+                errors.append(f"session.{session.name}: unknown vxc {session.vxc!r}")
 
         for interconnect in self.interconnects:
             require_device(interconnect.device, f"interconnect.{interconnect.name}")
@@ -207,6 +213,19 @@ class Topology(BaseModel):
                 require_device(prefix.origin_device, f"prefix.{prefix.prefix}")
 
         vpcs = {vpc.name for vpc in self.vpcs}
+
+        vxc_by_name = {vxc.name: vxc for vxc in self.vxcs}
+
+        for vxc in self.vxcs:
+            for end in (vxc.a_end, vxc.b_end):
+                if end.device is not None:
+                    require_device(end.device, f"vxc.{vxc.name}")
+                    if end.interface is not None and end.device in self.devices:
+                        if end.interface not in self.devices[end.device].interfaces:
+                            errors.append(
+                                f"vxc.{vxc.name}: interface {end.interface!r} not on {end.device!r}"
+                            )
+
         for subnet in self.subnets:
             if subnet.vpc not in vpcs:
                 errors.append(f"subnet.{subnet.name}: unknown vpc {subnet.vpc!r}")

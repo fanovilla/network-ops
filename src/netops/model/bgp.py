@@ -20,6 +20,7 @@ class BgpSession(BaseModel):
     policy_in: str | None = None
     policy_out: str | None = None
     interconnect: str | None = None
+    vxc: str | None = None
     admin_down: bool = False
 
 
