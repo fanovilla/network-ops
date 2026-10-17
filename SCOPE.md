@@ -75,8 +75,33 @@ Format of one decision block:
 
 ---
 
+## D2 — Expand out-of-scope for the MVP
+
+| Field | Value |
+|-------|-------|
+| Date | 2026-10-17 |
+| Decision | Out of scope for now: **VPN** overlays (only dedicated private circuits in-scope), **branches / meet-me rooms**, **DR sites** (model as additional on-prem DC), **customer/partner sites**, **cloud providers beyond AWS/Azure/GCP**, and the **physical/optical layer** (focus on BGP links). |
+| Rationale | Keep the modeled surface on dedicated private BGP connectivity; collapse failure analysis to DC/region scope rather than transport detail. |
+| Affects (req IDs) | NAC-M-02 (interconnect kinds), NAC-I-02 (provider importers), DIA-P-02 (ranks), SIM-S-02 (failure library), SIM-F-10 (summarized transport). |
+
+### Details & consequences
+
+- Effective interconnect kinds are **Direct Connect / Cloud Interconnect / ExpressRoute**. The `vpn` enum value and `examples/aws-hybrid.yaml` (Batfish `hybrid-cloud-aws` fixture) are retained solely as an **import-corpus drill** for NAC-I-01 — not a representation of the in-scope product (D1 covers only dedicated private circuits).
+- **DC / region failure grouping**: `device.site` and `device.region` are introduced as the unit a failure scenario can target (SIM-S-02) — failing a site or region brings down every device in that group. No transport/optical details are modeled; a DC or region is just a grouping of BGP speakers and links.
+- **Provider limit (AWS/Azure/GCP)** is a product/app rule, not a model constraint — the model stays extensible for new providers (X-07).
+- Not modeled now: IPsec/SD-WAN tunnels, EVPN/VXLAN overlays, DWDM/dark fiber, security appliances, IPAM/subnet hierarchies (deferred to a later scope-down pass).
+
+### Revisit triggers
+
+- Any requirement to model remote/branch connectivity or non-dedicated circuits (re-introduce `vpn`).
+- New cloud provider on the real network (relax the AWS/Azure/GCP app rule).
+- DR as a distinct site type once BCP planning needs it.
+
+---
+
 ## Decision log
 
 | # | Date | Statement | Status |
 |---|------|-----------|--------|
 | D1 | 2026-10-17 | Private networking only (DC↔cloud private links, DC↔DC); public transit/IXP deferred | Active |
+| D2 | 2026-10-17 | Out of scope for MVP: VPN, branches/meet-me rooms, DR-as-site, customer sites, providers beyond AWS/Azure/GCP, physical layer | Active |

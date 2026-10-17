@@ -62,6 +62,8 @@ class Device(BaseModel):
     asn: int
     router_id: str
     platform: str | None = None
+    site: str | None = None
+    region: str | None = None
     interfaces: dict[str, Interface] = Field(default_factory=dict)
     igp: DeviceIgp | None = None
     labels: list[str] = Field(default_factory=list)

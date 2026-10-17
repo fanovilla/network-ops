@@ -1,25 +1,24 @@
 name: netops-example
 schema_version: 0.1.0
-
 annotations:
   owner: netops
   scope: example-all-fields
-
 ases:
-  "65100":
+  '65100':
     name: example-net
     type: private
-    labels: [primary, dc]
-  "16509":
+    labels:
+    - primary
+    - dc
+  '16509':
     name: aws
     type: cloud
-  "15169":
+  '15169':
     name: google
     type: cloud
-  "8075":
+  '8075':
     name: microsoft
     type: cloud
-
 providers:
   aws:
     name: aws
@@ -30,343 +29,440 @@ providers:
   azure:
     name: azure
     asn: 8075
-
 regions:
-  - { provider: aws, name: us-east-1 }
-  - { provider: gcp, name: us-central1 }
-  - { provider: azure, name: eastus }
-
+- provider: aws
+  name: us-east-1
+- provider: gcp
+  name: us-central1
+- provider: azure
+  name: eastus
 devices:
   dc-core-1:
     role: dc_core
     asn: 65100
     router_id: 10.10.0.1
+    site: dc1
+    region: eu-west-2
     platform: junos
-    igp: { protocol: ospf, areas: ["0.0.0.0"] }
+    igp:
+      protocol: ospf
+      areas:
+      - 0.0.0.0
     interfaces:
-      lo0: { ip: 10.10.0.1/32, role: loopback }
-      et-core-edge1: { ip: 10.20.0.0/31, bandwidth_gbps: 100, mtu: 9216, role: fabric }
-      et-core-edge2: { ip: 10.20.0.4/31, bandwidth_gbps: 100, mtu: 9216, role: fabric }
-      et-core-agg: { ip: 10.20.1.0/31, bandwidth_gbps: 200, mtu: 9216, role: fabric }
+      lo0:
+        ip: 10.10.0.1/32
+        role: loopback
+      et-core-edge1:
+        ip: 10.20.0.0/31
+        bandwidth_gbps: 100
+        mtu: 9216
+        role: fabric
+      et-core-edge2:
+        ip: 10.20.0.4/31
+        bandwidth_gbps: 100
+        mtu: 9216
+        role: fabric
+      et-core-agg:
+        ip: 10.20.1.0/31
+        bandwidth_gbps: 200
+        mtu: 9216
+        role: fabric
   dc-core-2:
     role: dc_core
     asn: 65100
     router_id: 10.10.0.2
+    site: dc1
+    region: eu-west-2
     platform: junos
-    igp: { protocol: ospf, areas: ["0.0.0.0"] }
+    igp:
+      protocol: ospf
+      areas:
+      - 0.0.0.0
     provenance:
       side: imported
       source: dx1-bgp-summary
-      collected_at: 2026-10-17T09:30:00Z
+      collected_at: 2026-10-17 09:30:00+00:00
       status: degraded
     interfaces:
-      lo0: { ip: 10.10.0.2/32, role: loopback }
-      et-core-edge1: { ip: 10.20.0.2/31, bandwidth_gbps: 100, mtu: 9216 }
-      et-core-edge2: { ip: 10.20.0.6/31, bandwidth_gbps: 100, mtu: 9216 }
-      et-core-agg: { ip: 10.20.1.2/31, bandwidth_gbps: 200, mtu: 9216 }
+      lo0:
+        ip: 10.10.0.2/32
+        role: loopback
+      et-core-edge1:
+        ip: 10.20.0.2/31
+        bandwidth_gbps: 100
+        mtu: 9216
+      et-core-edge2:
+        ip: 10.20.0.6/31
+        bandwidth_gbps: 100
+        mtu: 9216
+      et-core-agg:
+        ip: 10.20.1.2/31
+        bandwidth_gbps: 200
+        mtu: 9216
   dc-edge-1:
     role: dc_edge
     asn: 65100
     router_id: 10.10.2.1
+    site: dc1
+    region: eu-west-2
     platform: iosxr
-    igp: { protocol: ospf, areas: ["0.0.0.0"] }
-    labels: [edge, aws]
+    igp:
+      protocol: ospf
+      areas:
+      - 0.0.0.0
+    labels:
+    - edge
+    - aws
     interfaces:
-      lo0: { ip: 10.10.2.1/32, role: loopback }
-      et-edge-core1: { ip: 10.20.0.1/31, bandwidth_gbps: 100 }
-      et-edge-core2: { ip: 10.20.0.5/31, bandwidth_gbps: 100 }
-      et-edge-dx: { ip: 10.110.0.1/30, bandwidth_gbps: 10, role: interconnect }
-      et-edge-er: { ip: 10.112.0.1/30, bandwidth_gbps: 2, role: interconnect }
+      lo0:
+        ip: 10.10.2.1/32
+        role: loopback
+      et-edge-core1:
+        ip: 10.20.0.1/31
+        bandwidth_gbps: 100
+      et-edge-core2:
+        ip: 10.20.0.5/31
+        bandwidth_gbps: 100
+      et-edge-dx:
+        ip: 10.110.0.1/30
+        bandwidth_gbps: 10
+        role: interconnect
+      et-edge-er:
+        ip: 10.112.0.1/30
+        bandwidth_gbps: 2
+        role: interconnect
   dc-edge-2:
     role: dc_edge
     asn: 65100
     router_id: 10.10.2.2
+    site: dc1
+    region: eu-west-2
     platform: iosxr
-    igp: { protocol: ospf, areas: ["0.0.0.0"] }
-    labels: [edge, gcp]
+    igp:
+      protocol: ospf
+      areas:
+      - 0.0.0.0
+    labels:
+    - edge
+    - gcp
     interfaces:
-      lo0: { ip: 10.10.2.2/32, role: loopback }
-      et-edge-core1: { ip: 10.20.0.3/31, bandwidth_gbps: 100 }
-      et-edge-core2: { ip: 10.20.0.7/31, bandwidth_gbps: 100 }
-      et-edge-dx: { ip: 10.111.0.1/30, bandwidth_gbps: 10, role: interconnect }
+      lo0:
+        ip: 10.10.2.2/32
+        role: loopback
+      et-edge-core1:
+        ip: 10.20.0.3/31
+        bandwidth_gbps: 100
+      et-edge-core2:
+        ip: 10.20.0.7/31
+        bandwidth_gbps: 100
+      et-edge-dx:
+        ip: 10.111.0.1/30
+        bandwidth_gbps: 10
+        role: interconnect
   dc-agg-1:
     role: dc_aggregation
     asn: 65100
     router_id: 10.10.1.1
+    site: dc1
+    region: eu-west-2
     platform: arista
-    igp: { protocol: ospf, areas: ["0.0.0.0"] }
+    igp:
+      protocol: ospf
+      areas:
+      - 0.0.0.0
     interfaces:
-      lo0: { ip: 10.10.1.1/32, role: loopback }
-      et-agg-core1: { ip: 10.20.1.1/31, bandwidth_gbps: 200 }
-      et-agg-core2: { ip: 10.20.1.3/31, bandwidth_gbps: 200 }
-
+      lo0:
+        ip: 10.10.1.1/32
+        role: loopback
+      et-agg-core1:
+        ip: 10.20.1.1/31
+        bandwidth_gbps: 200
+      et-agg-core2:
+        ip: 10.20.1.3/31
+        bandwidth_gbps: 200
 links:
-  - name: l-c1-c2
-    device_a: dc-core-1
-    interface_a: et-core-edge1
-    device_b: dc-core-2
-    interface_b: et-core-edge1
-    type: lag
-    metric: 5
-    bandwidth_gbps: 200
-    fate_share_group: lag-core12
-    status: down
-  - name: l-c1-e1
-    device_a: dc-core-1
-    interface_a: et-core-edge1
-    device_b: dc-edge-1
-    interface_b: et-edge-core1
-    metric: 10
-    bandwidth_gbps: 100
-  - name: l-c1-e2
-    device_a: dc-core-1
-    interface_a: et-core-edge2
-    device_b: dc-edge-2
-    interface_b: et-edge-core1
-    metric: 10
-    bandwidth_gbps: 100
-  - name: l-c2-e1
-    device_a: dc-core-2
-    interface_a: et-core-edge1
-    device_b: dc-edge-1
-    interface_b: et-edge-core2
-    metric: 10
-    bandwidth_gbps: 100
-  - name: l-c2-e2
-    device_a: dc-core-2
-    interface_a: et-core-edge2
-    device_b: dc-edge-2
-    interface_b: et-edge-core2
-    metric: 10
-    bandwidth_gbps: 100
-  - name: l-c1-agg
-    device_a: dc-core-1
-    interface_a: et-core-agg
-    device_b: dc-agg-1
-    interface_b: et-agg-core1
-    metric: 10
-    bandwidth_gbps: 200
-  - name: l-c2-agg
-    device_a: dc-core-2
-    interface_a: et-core-agg
-    device_b: dc-agg-1
-    interface_b: et-agg-core2
-    metric: 10
-    bandwidth_gbps: 200
-
+- name: l-c1-c2
+  device_a: dc-core-1
+  interface_a: et-core-edge1
+  device_b: dc-core-2
+  interface_b: et-core-edge1
+  type: lag
+  metric: 5
+  bandwidth_gbps: 200
+  fate_share_group: lag-core12
+  status: down
+- name: l-c1-e1
+  device_a: dc-core-1
+  interface_a: et-core-edge1
+  device_b: dc-edge-1
+  interface_b: et-edge-core1
+  metric: 10
+  bandwidth_gbps: 100
+- name: l-c1-e2
+  device_a: dc-core-1
+  interface_a: et-core-edge2
+  device_b: dc-edge-2
+  interface_b: et-edge-core1
+  metric: 10
+  bandwidth_gbps: 100
+- name: l-c2-e1
+  device_a: dc-core-2
+  interface_a: et-core-edge1
+  device_b: dc-edge-1
+  interface_b: et-edge-core2
+  metric: 10
+  bandwidth_gbps: 100
+- name: l-c2-e2
+  device_a: dc-core-2
+  interface_a: et-core-edge2
+  device_b: dc-edge-2
+  interface_b: et-edge-core2
+  metric: 10
+  bandwidth_gbps: 100
+- name: l-c1-agg
+  device_a: dc-core-1
+  interface_a: et-core-agg
+  device_b: dc-agg-1
+  interface_b: et-agg-core1
+  metric: 10
+  bandwidth_gbps: 200
+- name: l-c2-agg
+  device_a: dc-core-2
+  interface_a: et-core-agg
+  device_b: dc-agg-1
+  interface_b: et-agg-core2
+  metric: 10
+  bandwidth_gbps: 200
 prefixes:
-  - prefix: 10.50.0.0/22
-    origin_device: dc-edge-1
-    anycast: true
-    labels: [service]
-  - prefix: 10.50.0.0/22
-    origin_device: dc-edge-2
-    anycast: true
-    labels: [service]
-  - prefix: 10.100.0.0/20
-    origin_device: dc-core-1
-    local_pref: 120
-    labels: [backend]
-  - prefix: 10.200.0.0/24
-    anycast: true
-    local_pref: 130
-    labels: [dns]
-
+- prefix: 10.50.0.0/22
+  origin_device: dc-edge-1
+  anycast: true
+  labels:
+  - service
+- prefix: 10.50.0.0/22
+  origin_device: dc-edge-2
+  anycast: true
+  labels:
+  - service
+- prefix: 10.100.0.0/20
+  origin_device: dc-core-1
+  local_pref: 120
+  labels:
+  - backend
+- prefix: 10.200.0.0/24
+  anycast: true
+  local_pref: 130
+  labels:
+  - dns
 interconnects:
-  - name: dx1-aws-use1
-    kind: direct_connect
-    provider: aws
-    region: us-east-1
-    device: dc-edge-1
-    interface: et-edge-dx
-    vif: dxvif-100
-    vlan: 100
-    capacity_gbps: 10
-    ipv4: 10.110.0.0/30
-    status: up
-  - name: cic1-gcp-usc
-    kind: cloud_interconnect
-    provider: gcp
-    region: us-central1
-    device: dc-edge-2
-    interface: et-edge-dx
-    vif: bc-111
-    vlan: 111
-    capacity_gbps: 10
-    ipv4: 10.111.0.0/30
-  - name: er1-azure-eastus
-    kind: expressroute
-    provider: azure
-    region: eastus
-    device: dc-edge-1
-    interface: et-edge-er
-    vif: msee-122
-    vlan: 200
-    capacity_gbps: 2
-    ipv4: 10.112.0.0/30
-
+- name: dx1-aws-use1
+  kind: direct_connect
+  provider: aws
+  region: us-east-1
+  device: dc-edge-1
+  interface: et-edge-dx
+  vif: dxvif-100
+  vlan: 100
+  capacity_gbps: 10
+  ipv4: 10.110.0.0/30
+  status: up
+- name: cic1-gcp-usc
+  kind: cloud_interconnect
+  provider: gcp
+  region: us-central1
+  device: dc-edge-2
+  interface: et-edge-dx
+  vif: bc-111
+  vlan: 111
+  capacity_gbps: 10
+  ipv4: 10.111.0.0/30
+- name: er1-azure-eastus
+  kind: expressroute
+  provider: azure
+  region: eastus
+  device: dc-edge-1
+  interface: et-edge-er
+  vif: msee-122
+  vlan: 200
+  capacity_gbps: 2
+  ipv4: 10.112.0.0/30
 transit_gateways:
-  - name: aws-tgw-1
-    provider: aws
-
+- name: aws-tgw-1
+  provider: aws
 vpcs:
-  - name: vpc-aws-use1
-    provider: aws
-    region: us-east-1
-    cidr: 10.240.0.0/16
-    transit_gateway: aws-tgw-1
-  - name: vpc-gcp-usc
-    provider: gcp
-    region: us-central1
-    cidr: 10.241.0.0/16
-
+- name: vpc-aws-use1
+  provider: aws
+  region: us-east-1
+  cidr: 10.240.0.0/16
+  transit_gateway: aws-tgw-1
+- name: vpc-gcp-usc
+  provider: gcp
+  region: us-central1
+  cidr: 10.241.0.0/16
 route_tables:
-  - name: rt-aws-tgw-1
-    transit_gateway: aws-tgw-1
-    entries:
-      - { prefix: 10.240.0.0/16, target: tgw-attach-vpc-aws-use1, kind: propagated }
-      - { prefix: 10.50.0.0/22, target: tgw-attach-dc1, kind: propagated }
-  - name: rt-vpc-gcp-usc
-    vpc: vpc-gcp-usc
-    entries:
-      - { prefix: 10.241.0.0/16, target: gateway, kind: propagated }
-      - { prefix: 10.50.0.0/22, target: gcp-edge-dc1, kind: static }
-
+- name: rt-aws-tgw-1
+  transit_gateway: aws-tgw-1
+  entries:
+  - prefix: 10.240.0.0/16
+    target: tgw-attach-vpc-aws-use1
+    kind: propagated
+  - prefix: 10.50.0.0/22
+    target: tgw-attach-dc1
+    kind: propagated
+- name: rt-vpc-gcp-usc
+  vpc: vpc-gcp-usc
+  entries:
+  - prefix: 10.241.0.0/16
+    target: gateway
+    kind: propagated
+  - prefix: 10.50.0.0/22
+    target: gcp-edge-dc1
+    kind: static
 rr_clusters:
-  - id: dc1
-    reflectors: [dc-core-1, dc-core-2]
-    clients: [dc-edge-1, dc-edge-2, dc-agg-1]
-
+- id: dc1
+  reflectors:
+  - dc-core-1
+  - dc-core-2
+  clients:
+  - dc-edge-1
+  - dc-edge-2
+  - dc-agg-1
 sessions:
-  - name: s-c1-c2
-    type: ibgp
-    local_device: dc-core-1
-    local_asn: 65100
-    peer_asn: 65100
-    peer: dc-core-2
-    local_ip: 10.10.0.1
-    peer_ip: 10.10.0.2
-    multihop: true
-  - name: s-e1-c1
-    type: ibgp
-    local_device: dc-edge-1
-    local_asn: 65100
-    peer_asn: 65100
-    peer: dc-core-1
-    local_ip: 10.10.2.1
-    peer_ip: 10.10.0.1
-    multihop: true
-    rr_client: true
-  - name: s-e1-c2
-    type: ibgp
-    local_device: dc-edge-1
-    local_asn: 65100
-    peer_asn: 65100
-    peer: dc-core-2
-    local_ip: 10.10.2.1
-    peer_ip: 10.10.0.2
-    multihop: true
-    rr_client: true
-  - name: s-e2-c1
-    type: ibgp
-    local_device: dc-edge-2
-    local_asn: 65100
-    peer_asn: 65100
-    peer: dc-core-1
-    local_ip: 10.10.2.2
-    peer_ip: 10.10.0.1
-    multihop: true
-    rr_client: true
-  - name: s-e2-c2
-    type: ibgp
-    local_device: dc-edge-2
-    local_asn: 65100
-    peer_asn: 65100
-    peer: dc-core-2
-    local_ip: 10.10.2.2
-    peer_ip: 10.10.0.2
-    multihop: true
-    rr_client: true
-    admin_down: true
-  - name: s-agg-c1
-    type: ibgp
-    local_device: dc-agg-1
-    local_asn: 65100
-    peer_asn: 65100
-    peer: dc-core-1
-    local_ip: 10.10.1.1
-    peer_ip: 10.10.0.1
-    multihop: true
-    rr_client: true
-  - name: s-agg-c2
-    type: ibgp
-    local_device: dc-agg-1
-    local_asn: 65100
-    peer_asn: 65100
-    peer: dc-core-2
-    local_ip: 10.10.1.1
-    peer_ip: 10.10.0.2
-    multihop: true
-    rr_client: true
-  - name: s-e1-aws
-    type: ebgp
-    local_device: dc-edge-1
-    local_asn: 65100
-    peer_asn: 16509
-    peer: aws-use1
-    local_ip: 10.110.0.1
-    peer_ip: 10.110.0.2
-    allowas_in: true
-    interconnect: dx1-aws-use1
-    policy_in: CLOUD_INC_LP
-    policy_out: EBGP_ALLOW
-  - name: s-e2-aws
-    type: ebgp
-    local_device: dc-edge-2
-    local_asn: 65100
-    peer_asn: 16509
-    peer: gcp-usc1
-    local_ip: 10.111.0.1
-    peer_ip: 10.111.0.2
-    interconnect: cic1-gcp-usc
-    policy_in: CLOUD_INC_LP
-    policy_out: EBGP_ALLOW
-
+- name: s-c1-c2
+  type: ibgp
+  local_device: dc-core-1
+  local_asn: 65100
+  peer_asn: 65100
+  peer: dc-core-2
+  local_ip: 10.10.0.1
+  peer_ip: 10.10.0.2
+  multihop: true
+- name: s-e1-c1
+  type: ibgp
+  local_device: dc-edge-1
+  local_asn: 65100
+  peer_asn: 65100
+  peer: dc-core-1
+  local_ip: 10.10.2.1
+  peer_ip: 10.10.0.1
+  multihop: true
+  rr_client: true
+- name: s-e1-c2
+  type: ibgp
+  local_device: dc-edge-1
+  local_asn: 65100
+  peer_asn: 65100
+  peer: dc-core-2
+  local_ip: 10.10.2.1
+  peer_ip: 10.10.0.2
+  multihop: true
+  rr_client: true
+- name: s-e2-c1
+  type: ibgp
+  local_device: dc-edge-2
+  local_asn: 65100
+  peer_asn: 65100
+  peer: dc-core-1
+  local_ip: 10.10.2.2
+  peer_ip: 10.10.0.1
+  multihop: true
+  rr_client: true
+- name: s-e2-c2
+  type: ibgp
+  local_device: dc-edge-2
+  local_asn: 65100
+  peer_asn: 65100
+  peer: dc-core-2
+  local_ip: 10.10.2.2
+  peer_ip: 10.10.0.2
+  multihop: true
+  rr_client: true
+  admin_down: true
+- name: s-agg-c1
+  type: ibgp
+  local_device: dc-agg-1
+  local_asn: 65100
+  peer_asn: 65100
+  peer: dc-core-1
+  local_ip: 10.10.1.1
+  peer_ip: 10.10.0.1
+  multihop: true
+  rr_client: true
+- name: s-agg-c2
+  type: ibgp
+  local_device: dc-agg-1
+  local_asn: 65100
+  peer_asn: 65100
+  peer: dc-core-2
+  local_ip: 10.10.1.1
+  peer_ip: 10.10.0.2
+  multihop: true
+  rr_client: true
+- name: s-e1-aws
+  type: ebgp
+  local_device: dc-edge-1
+  local_asn: 65100
+  peer_asn: 16509
+  peer: aws-use1
+  local_ip: 10.110.0.1
+  peer_ip: 10.110.0.2
+  allowas_in: true
+  interconnect: dx1-aws-use1
+  policy_in: CLOUD_INC_LP
+  policy_out: EBGP_ALLOW
+- name: s-e2-aws
+  type: ebgp
+  local_device: dc-edge-2
+  local_asn: 65100
+  peer_asn: 16509
+  peer: gcp-usc1
+  local_ip: 10.111.0.1
+  peer_ip: 10.111.0.2
+  interconnect: cic1-gcp-usc
+  policy_in: CLOUD_INC_LP
+  policy_out: EBGP_ALLOW
 prefix_lists:
-  - name: PL_DC_SVC
-    entries:
-      - { prefix: 10.50.0.0/22 }
-      - { prefix: 10.100.0.0/20, le: 20 }
-
+- name: PL_DC_SVC
+  entries:
+  - prefix: 10.50.0.0/22
+  - prefix: 10.100.0.0/20
+    le: 20
 as_path_filters:
-  - name: AS_PATH_NONE
-    regex: "^$"
-  - name: AS_PATH_KNOWN
-    regex: "^(65500|16509|15169|8075)+$"
-
+- name: AS_PATH_NONE
+  regex: ^$
+- name: AS_PATH_KNOWN
+  regex: ^(65500|16509|15169|8075)+$
 community_lists:
-  - name: COMMUNITY_NO_EXPORT
-    communities: ["65100:no-export"]
-
+- name: COMMUNITY_NO_EXPORT
+  communities:
+  - 65100:no-export
 route_policies:
-  - name: CLOUD_INC_LP
-    statements:
-      - order: 10
-        action: permit
-        match: { prefix_list: PL_DC_SVC }
-        set: { local_pref: 120, weight: 100 }
-      - order: 20
-        action: permit
-        match: { community_list: COMMUNITY_NO_EXPORT }
-        set: { med: 50 }
-      - order: 30
-        action: permit
-  - name: EBGP_ALLOW
-    statements:
-      - order: 10
-        action: permit
-  - name: LB_PREPEND
-    statements:
-      - order: 10
-        action: permit
-        set: { as_path_prepend: 2, communities: ["65100:no-export"] }
+- name: CLOUD_INC_LP
+  statements:
+  - order: 10
+    action: permit
+    match:
+      prefix_list: PL_DC_SVC
+    set:
+      local_pref: 120
+      weight: 100
+  - order: 20
+    action: permit
+    match:
+      community_list: COMMUNITY_NO_EXPORT
+    set:
+      med: 50
+  - order: 30
+    action: permit
+- name: EBGP_ALLOW
+  statements:
+  - order: 10
+    action: permit
+- name: LB_PREPEND
+  statements:
+  - order: 10
+    action: permit
+    set:
+      as_path_prepend: 2
+      communities:
+      - 65100:no-export
